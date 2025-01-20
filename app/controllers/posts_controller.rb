@@ -1,6 +1,11 @@
 class PostsController < ApplicationController
   before_action :set_post, only: %i[ show edit update destroy ]
 
+  rate_limit to: 3, within: 1.minute,
+    by: -> { request.domain },
+    with: -> { redirect_to posts_path, alert: "Too many login attemps on domain!, Please try after some time" },
+    only: :new
+
   # GET /posts or /posts.json
   def index
     @posts = Post.all
