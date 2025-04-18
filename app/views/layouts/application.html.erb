@@ -13,9 +13,9 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.svg">
 
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
@@ -29,14 +29,46 @@
           <div class="flex h-16 items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <h1 class="text-white text-xl font-bold">System Designs</h1>
+                <h1 class="text-white text-xl font-bold flex items-center">
+                  <%= link_to root_path, class: "flex items-center" do %>
+                    <svg class="h-8 w-8 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="2" fill="#ffffff" stroke="none" />
+                      <circle cx="12" cy="12" r="4" fill="none" stroke="#000000" />
+                      <line x1="12" y1="4" x2="12" y2="6" stroke="#000000" />
+                      <line x1="12" y1="18" x2="12" y2="20" stroke="#000000" />
+                      <line x1="4" y1="12" x2="6" y2="12" stroke="#000000" />
+                      <line x1="18" y1="12" x2="20" y2="12" stroke="#000000" />
+                    </svg>
+                    System Designs
+                  <% end %>
+                </h1>
               </div>
               <div class="hidden md:block">
                 <div class="ml-10 flex items-baseline space-x-4">
-                  <%= link_to "Home", root_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Rate Limiting", rate_limiting_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Partitioning", system_designs_partitioning_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Sharding", system_designs_sharding_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
+                  <%= link_to rate_limiting_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium flex items-center" do %>
+                    <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" fill="none" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                    Rate Limiting
+                  <% end %>
+                  
+                  <%= link_to system_designs_partitioning_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium flex items-center" do %>
+                    <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="2" />
+                      <line x1="12" y1="2" x2="12" y2="22" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                    </svg>
+                    Partitioning
+                  <% end %>
+                  
+                  <%= link_to system_designs_sharding_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium flex items-center" do %>
+                    <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+                      <line x1="12" y1="2" x2="12" y2="22" />
+                    </svg>
+                    Sharding
+                  <% end %>
                 </div>
               </div>
             </div>

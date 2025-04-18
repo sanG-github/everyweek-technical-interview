@@ -5,27 +5,48 @@
       <p class="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">System Design Implementations</p>
       <p class="mt-6 text-lg leading-8 text-gray-600">Hands-on examples of system design concepts implemented in Ruby on Rails 8. Explore interactive examples to better understand these important engineering concepts.</p>
     </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+    
+    <div class="mx-auto mt-16 max-w-2xl lg:mt-24 lg:max-w-5xl">
+      <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <% @system_designs.each do |design| %>
-          <div class="relative pl-16">
-            <dt class="text-base font-semibold leading-7 text-black">
-              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-black">
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+          <div class="relative overflow-hidden rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-black">
+              <% if design[:name] == "Rate Limiting" %>
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
                 </svg>
-              </div>
-              <%= design[:name] %>
-            </dt>
-            <dd class="mt-2 text-base leading-7 text-gray-600">
-              <p><%= design[:description] %></p>
-              <div class="mt-4">
-                <%= link_to "Explore #{design[:name]}", design[:path], class: "text-sm font-semibold leading-6 text-black hover:text-gray-700 border-b border-black pb-1" %>
-              </div>
-            </dd>
+              <% elsif design[:name] == "Partitioning" %>
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="2" />
+                  <line x1="12" y1="2" x2="12" y2="22" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                </svg>
+              <% elsif design[:name] == "Sharding" %>
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+                  <line x1="12" y1="2" x2="12" y2="22" />
+                </svg>
+              <% end %>
+            </div>
+            
+            <h3 class="mt-4 text-xl font-semibold tracking-tight text-black"><%= design[:name] %></h3>
+            
+            <p class="mt-2 text-base leading-7 text-gray-600">
+              <%= design[:description] %>
+            </p>
+            
+            <div class="mt-6">
+              <%= link_to design[:path], class: "inline-flex items-center text-sm font-semibold leading-6 text-black transition-colors hover:text-gray-700" do %>
+                Explore <%= design[:name] %>
+                <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+              <% end %>
+            </div>
           </div>
         <% end %>
-      </dl>
+      </div>
     </div>
   </div>
 </div>
