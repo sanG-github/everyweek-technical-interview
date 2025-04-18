@@ -1,0 +1,20 @@
+<%= turbo_stream.replace "api_responses" do %>
+  <div id="api_responses" class="h-32 overflow-y-auto p-2 bg-gray-100 rounded text-sm font-mono">
+    <div class="<%= flash[:api_error] ? 'text-gray-800' : 'text-gray-800' %>">
+      <%= flash[:api_message] %>
+    </div>
+  </div>
+<% end %>
+
+<%= turbo_stream.update "rate_limit_status" do %>
+  <% 
+    # Build the cache key the same way the controller does
+    cache_key = ["rate-limit", controller.controller_path, nil, request.domain].compact.join(":")
+  %>
+  <%= render "rate_limiting/inline_status", 
+      count: 0, 
+      limit: 4,
+      reset_time: 0,
+      cache_key: cache_key,
+      expires_at: nil %>
+<% end %> 

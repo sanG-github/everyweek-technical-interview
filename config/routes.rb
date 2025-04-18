@@ -1,12 +1,13 @@
 Rails.application.routes.draw do
-  get "system_designs/index"
-  get "system_designs/rate_limiting"
-  get "system_designs/partitioning"
-  get "system_designs/sharding"
+  # System designs overview
+  get "system_designs", to: "system_designs#index", as: :system_designs
+  get "system_designs/partitioning", as: :system_designs_partitioning
+  get "system_designs/sharding", as: :system_designs_sharding
 
-  # API Demo endpoints
-  post "system_designs/api_demo"
-  post "system_designs/reset_rate_limit"
+  # Rate limiting dedicated controller
+  get "rate_limiting", to: "rate_limiting#index", as: :rate_limiting
+  post "rate_limiting", to: "rate_limiting#create", as: :rate_limiting_api
+  post "rate_limiting/reset", to: "rate_limiting#reset", as: :rate_limiting_reset
 
   resources :posts
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

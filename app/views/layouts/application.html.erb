@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="h-full bg-white">
   <head>
-    <title><%= content_for(:title) || "ByteByteGo System Designs" %></title>
+    <title><%= content_for(:title) || "System Designs" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -29,12 +29,12 @@
           <div class="flex h-16 items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <h1 class="text-white text-xl font-bold">ByteByteGo System Designs</h1>
+                <h1 class="text-white text-xl font-bold">System Designs</h1>
               </div>
               <div class="hidden md:block">
                 <div class="ml-10 flex items-baseline space-x-4">
                   <%= link_to "Home", root_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Rate Limiting", system_designs_rate_limiting_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
+                  <%= link_to "Rate Limiting", rate_limiting_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
                   <%= link_to "Partitioning", system_designs_partitioning_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
                   <%= link_to "Sharding", system_designs_sharding_path, class: "text-gray-300 hover:bg-gray-900 hover:text-white rounded-md px-3 py-2 text-sm font-medium" %>
                 </div>

@@ -1,0 +1,127 @@
+<div class="mx-auto max-w-4xl text-center bg-white px-6 py-24 sm:py-32 lg:px-8">
+  <p class="text-base font-semibold leading-7 text-gray-600">System Design</p>
+  <h1 class="mt-2 text-4xl font-bold tracking-tight text-black sm:text-6xl">Rate Limiting</h1>
+  <p class="mt-6 text-lg leading-8 text-gray-600">
+    A technique used to control the amount of requests a user can make to an API within a certain timeframe.
+  </p>
+  
+  <div class="mt-10 flex items-center justify-center gap-x-6">
+    <%= link_to "← Back to System Designs", root_path, class: "rounded-md bg-black px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black" %>
+  </div>
+</div>
+
+<div class="bg-white px-6 py-8 sm:py-12 lg:px-8">
+  <div class="mx-auto max-w-4xl text-base leading-7 text-gray-700">
+    <div class="mt-10 max-w-3xl">
+      <h2 class="mt-8 text-2xl font-bold tracking-tight text-black">Native Rails 8 Rate Limiting</h2>
+      <p class="mt-4">
+        This example uses the native <code>rate_limit</code> method in Rails 8 to limit API requests.
+        We're limiting to <strong>4 requests per minute</strong> based on the requesting domain.
+      </p>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-md border border-gray-200">
+        <pre class="text-sm overflow-x-auto"><code>class RateLimitingController < ApplicationController
+  # Rails 8 rate limiting configuration
+  rate_limit to: 4, 
+             within: 1.minute, 
+             by: -> { request.domain },
+             with: -> {
+               # Custom response handler for rate limiting
+               respond_to do |format|
+                 format.json { render json: { error: "Rate limited" }, status: :too_many_requests }
+                 format.html { head :too_many_requests }
+               end
+             },
+             only: :create
+  
+  def create
+    # API endpoint logic here
+  end
+end</code></pre>
+      </div>
+      
+      <div class="mt-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-bold tracking-tight text-black">Live Demo</h3>
+        <p class="mt-2">
+          Click the button below to make API requests and observe the rate limiting in action. After 4 requests in a minute, you'll be rate limited.
+        </p>
+        
+        <div class="mt-4">
+          <div class="border rounded-md p-4 bg-white">
+            <h4 class="text-sm font-medium mb-2">API Responses</h4>
+            
+            <div id="api_responses" class="h-32 overflow-y-auto p-2 bg-gray-100 rounded text-sm font-mono">
+              <% if flash[:api_message] %>
+                <div class="<%= flash[:api_error] ? 'text-gray-800' : 'text-gray-800' %>">
+                  <%= flash[:api_message] %>
+                </div>
+              <% else %>
+                <div class="text-gray-500">Responses will appear here...</div>
+              <% end %>
+            </div>
+            
+            <div class="mt-4 flex justify-center gap-4">
+              <%= form_with url: rate_limiting_api_path, method: :post, data: { turbo: true } do |form| %>
+                <%= form.button "Make API Request", 
+                    type: "submit",
+                    class: "rounded-md bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black" %>
+              <% end %>
+              
+              <%= form_with url: rate_limiting_reset_path, method: :post, data: { turbo: true } do |form| %>
+                <%= form.button "Reset Counter", 
+                    type: "submit",
+                    class: "rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <div id="rate_limit_status" class="mt-6 p-4 border rounded-md bg-white">
+          <% 
+            # Build the cache key the same way the controller does
+            cache_key = ["rate-limit", "rate_limiting", nil, request.domain].compact.join(":")
+            count = Rails.cache.read(cache_key) || 0
+            limit = 4
+            reset_time = Rails.cache.read("rate-limit-reset:rate_limiting:create:#{request.domain}")
+            seconds_remaining = reset_time ? (reset_time - Time.now).round : 0
+          %>
+          <%= render "rate_limiting/inline_status", 
+              count: count, 
+              limit: limit,
+              reset_time: seconds_remaining,
+              cache_key: cache_key,
+              expires_at: reset_time %>
+        </div>
+      </div>
+      
+      <h2 class="mt-10 text-2xl font-bold tracking-tight text-black">How Rails 8 Rate Limiting Works</h2>
+      <p class="mt-4">Rails 8 provides a simple DSL for rate limiting with the following parameters:</p>
+      
+      <ul class="mt-4 list-disc pl-5 space-y-2">
+        <li><strong>to:</strong> The maximum number of requests allowed (4 in our example)</li>
+        <li><strong>within:</strong> The time window for the limit (1 minute)</li>
+        <li><strong>by:</strong> A lambda that returns the key to identify clients (domain in our case)</li>
+        <li><strong>with:</strong> A custom response handler when rate limit is exceeded</li>
+        <li><strong>only/except:</strong> Action filters to apply selectively</li>
+      </ul>
+      
+      <p class="mt-4">Rails implements this using a cache-based counter that tracks requests within the specified window:</p>
+      
+      <div class="mt-4 bg-gray-100 p-4 rounded-md border border-gray-200">
+        <pre class="text-sm overflow-x-auto"><code>def rate_limit(to:, within:, by: -> { request.remote_ip }, with: -> { head :too_many_requests }, store: cache_store, name: nil, **options)
+  before_action -> { rate_limiting(to: to, within: within, by: by, with: with, store: store, name: name) }, **options
+end
+
+def rate_limiting(to:, within:, by:, with:, store:, name:)
+  cache_key = ["rate-limit", controller_path, name, instance_exec(&by)].compact.join(":")
+  count = store.increment(cache_key, 1, expires_in: within)
+  if count && count > to
+    ActiveSupport::Notifications.instrument("rate_limit.action_controller", request: request) do
+      instance_exec(&with)
+    end
+  end
+end</code></pre>
+      </div>
+    </div>
+  </div>
+</div> 

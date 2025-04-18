@@ -1,0 +1,39 @@
+<h4 class="text-sm font-medium mb-3">Current Rate Limit Status</h4>
+          
+<div class="text-sm mb-2 flex justify-between items-center">
+  <span>Requests made:</span>
+  <span class="font-medium <%= count >= limit ? 'text-red-600' : 'text-green-600' %>">
+    <%= count %> / <%= limit %>
+  </span>
+</div>
+
+<div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+  <div class="<%= count >= limit ? 'bg-red-600' : 'bg-blue-600' %> h-2.5 rounded-full" style="width: <%= [(count.to_f / limit * 100), 100].min %>%"></div>
+</div>
+
+<div class="text-xs text-gray-500 mt-1">
+  <% if count >= limit %>
+    <span class="text-red-600">Rate limit exceeded!</span> 
+    <% if reset_time && reset_time > 0 %>
+      Limit resets in <%= reset_time %> seconds.
+    <% else %>
+      Try again now.
+    <% end %>
+  <% else %>
+    <% if reset_time && reset_time > 0 %>
+      <span>Rate limit status:</span> <%= limit - count %> requests remaining. Resets in <%= reset_time %> seconds.
+    <% else %>
+      <span>Rate limit status:</span> <%= limit - count %> requests remaining.
+    <% end %>
+  <% end %>
+</div>
+
+<div class="text-xs text-gray-400 mt-3">
+  <strong>Cache key:</strong> <%= cache_key %>
+  <% if expires_at %>
+    <div>
+      <strong>Expires at:</strong> <%= expires_at.strftime("%H:%M:%S") %> 
+      (<%= (expires_at - Time.now).round %> seconds from now)
+    </div>
+  <% end %>
+</div> 

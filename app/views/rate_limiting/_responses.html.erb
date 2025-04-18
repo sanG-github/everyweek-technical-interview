@@ -1,0 +1,7 @@
+<div id="api_responses" class="mt-4">
+  <% if flash[:api_message] %>
+    <div class="alert <%= flash[:api_error] ? 'alert-danger' : 'alert-success' %>">
+      <%= flash[:api_message] %>
+    </div>
+  <% end %>
+</div> 
