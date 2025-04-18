@@ -1,7 +1,0 @@
-<%= turbo_stream.replace "api_responses" do %>
-  <%= render partial: "rate_limiting/api_response" %>
-<% end %>
-
-<%= turbo_stream.update "rate_limit_status" do %>
-  <%= render partial: "rate_limiting/inline_status", locals: @status %>
-<% end %> 

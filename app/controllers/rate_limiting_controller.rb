@@ -30,7 +30,7 @@ class RateLimitingController < ApplicationController
         flash.now[:api_message] = "API request successful (#{response_time}ms)"
         flash.now[:api_error] = false
         @status = rate_limit_status(RATE_LIMIT)
-        render "create"
+        render "rate_limiting/default/create"
       end
       format.json { render json: { success: true, response_time: response_time } }
       format.html {
@@ -48,7 +48,7 @@ class RateLimitingController < ApplicationController
         flash.now[:api_message] = "Counter reset successfully"
         flash.now[:api_error] = false
         @status = reset_data
-        render "reset"
+        render "rate_limiting/default/reset"
       end
       format.json { render json: { success: true, message: "Counter reset successfully" } }
       format.html {
@@ -114,7 +114,7 @@ class RateLimitingController < ApplicationController
         flash.now[:api_message] = "Rate limited! Try again in #{seconds_until_reset} seconds."
         flash.now[:api_error] = true
         @status = rate_limit_status(RATE_LIMIT)
-        render "rate_limited"
+        render "rate_limiting/default/rate_limited"
       end
       format.json {
         render json: {
