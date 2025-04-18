@@ -9,6 +9,11 @@ Rails.application.routes.draw do
   post "rate_limiting", to: "rate_limiting#create", as: :rate_limiting_api
   post "rate_limiting/reset", to: "rate_limiting#reset", as: :rate_limiting_reset
 
+  # Sliding window rate limiting
+  post "rate_limiting/sliding_window", to: "rate_limiting#sliding_window", as: :rate_limiting_sliding_window
+  post "rate_limiting/sliding_window/reset", to: "rate_limiting#reset_sliding_window", as: :rate_limiting_reset_sliding_window
+  get "sliding-window-counter.svg", to: "rate_limiting#sliding_window_diagram"
+
   resources :posts
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "sliding_window_responses" do %>
+  <%= render "rate_limiting/api_response", message: flash[:api_message], error: flash[:api_error] %>
+<% end %>
+
+<%= turbo_stream.replace "sliding_window_status" do %>
+  <%= render "rate_limiting/sliding_window/status" %>
+<% end %> 

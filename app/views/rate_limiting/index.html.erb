@@ -99,13 +99,82 @@ end
 
 def rate_limiting(to:, within:, by:, with:, store:, name:)
   cache_key = ["rate-limit", controller_path, name, instance_exec(&by)].compact.join(":")
-  count = store.increment(cache_key, 1, expires_in: within)
+  <strong>count = store.increment(cache_key, 1, expires_in: within)</strong>
   if count && count > to
     ActiveSupport::Notifications.instrument("rate_limit.action_controller", request: request) do
       instance_exec(&with)
     end
   end
 end</code></pre>
+      </div>
+      
+      <p class="mt-4">This implementation uses a simple fixed window approach where:</p>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li>Each request increments a counter stored in the cache</li>
+        <li>The counter has an expiration time equal to the rate limit window</li>
+        <li>When the window expires, the counter resets automatically</li>
+        <li>If the counter exceeds the limit, the rate limit is triggered</li>
+      </ul>
+      
+      <p class="mt-4">While simple to implement, this approach can lead to uneven request distribution at window boundaries. For instance, a user could make the maximum requests at the end of one window and again at the beginning of the next window, effectively doubling the allowed rate for a short period.</p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-gray-50 px-6 py-8 sm:py-12 lg:px-8">
+  <div class="mx-auto max-w-4xl text-base leading-7 text-gray-700">
+    <div class="mt-10 max-w-3xl">
+      <h2 class="mt-8 text-2xl font-bold tracking-tight text-black">Sliding Window Counter Algorithm</h2>
+      <p class="mt-4">
+        The sliding window counter algorithm improves upon the fixed window approach by creating a rolling window that smoothly transitions between time periods, preventing traffic spikes at window boundaries.
+      </p>
+      
+      <div class="mt-4">
+        <img src="<%= asset_path('sliding-window-counter.svg') %>" alt="Sliding window counter diagram" class="w-full rounded-lg border border-gray-200">
+        <p class="mt-2 text-sm text-gray-500 text-center">Sliding window combines counts from the current and previous windows with appropriate weighting</p>
+      </div>
+      
+      <p class="mt-4">The algorithm works as follows:</p>
+      <ul class="mt-2 list-disc pl-5 space-y-1">
+        <li>Track request counts in discrete time windows (e.g., per minute)</li>
+        <li>Calculate a weighted sum of the current window and previous window</li>
+        <li>The weight for the previous window is based on how much of the rolling window overlaps with it</li>
+        <li>Formula: current_window_count + previous_window_count * overlap_percentage</li>
+      </ul>
+      
+      <div class="mt-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-bold tracking-tight text-black">Sliding Window Demo</h3>
+        <p class="mt-2">
+          Try the sliding window counter algorithm which allows <strong>5 requests per minute</strong> with a smooth rolling window.
+        </p>
+        
+        <div class="mt-4">
+          <div class="border rounded-md p-4 bg-white">
+            <h4 class="text-sm font-medium mb-2">API Responses</h4>
+            
+            <div id="sliding_window_responses" class="h-32 overflow-y-auto p-2 bg-gray-100 rounded text-sm font-mono">
+              <div class="text-gray-500">Responses will appear here...</div>
+            </div>
+            
+            <div class="mt-4 flex justify-center gap-4">
+              <%= form_with url: rate_limiting_sliding_window_path, method: :post, data: { turbo: true } do |form| %>
+                <%= form.button "Make API Request", 
+                    type: "submit",
+                    class: "rounded-md bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black" %>
+              <% end %>
+              
+              <%= form_with url: rate_limiting_reset_sliding_window_path, method: :post, data: { turbo: true } do |form| %>
+                <%= form.button "Reset Counter", 
+                    type: "submit",
+                    class: "rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 p-4 border rounded-md bg-white">
+          <%= render "rate_limiting/sliding_window/status" %>
+        </div>
       </div>
     </div>
   </div>

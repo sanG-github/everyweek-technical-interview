@@ -1,0 +1,156 @@
+<%= turbo_frame_tag "sliding_window_status" do %>
+  <% 
+    count = @sliding_window_status[:count]
+    current_count = @sliding_window_status[:current_count]
+    previous_count = @sliding_window_status[:previous_count]
+    position = @sliding_window_status[:position]
+    limit = @sliding_window_status[:limit]
+    remaining = @sliding_window_status[:remaining]
+    reset_time = @sliding_window_status[:reset_time]
+    window_size = @sliding_window_status[:window_size]
+    current_key = @sliding_window_status[:current_key]
+    previous_key = @sliding_window_status[:previous_key]
+    exceeded = @sliding_window_status[:exceeded]
+    current_window_expires_at = @sliding_window_status[:current_window_expires_at]
+    seconds_until_expiry = @sliding_window_status[:seconds_until_expiry]
+  %>
+
+  <h4 class="text-sm font-medium mb-3">Sliding Window Rate Limit Status</h4>
+
+  <div class="text-sm mb-2 flex justify-between items-center">
+    <span>Current window count:</span>
+    <span class="font-medium"><%= current_count %></span>
+  </div>
+
+  <div class="text-sm mb-2 flex justify-between items-center">
+    <span>Previous window count:</span>
+    <span class="font-medium"><%= previous_count %></span>
+  </div>
+
+  <div class="text-sm mb-2 flex justify-between items-center">
+    <span>Position in window:</span>
+    <span class="font-medium"><%= position * 100 %>%</span>
+  </div>
+
+  <div class="text-sm mb-2 flex justify-between items-center">
+    <span>Weighted count:</span>
+    <span class="font-medium <%= exceeded ? 'text-red-600' : 'text-green-600' %>">
+      <%= count %> / <%= limit %>
+    </span>
+  </div>
+
+  <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+    <div class="<%= exceeded ? 'bg-red-600' : 'bg-blue-600' %> h-2.5 rounded-full" style="width: <%= [(count.to_f / limit * 100), 100].min %>%"></div>
+  </div>
+
+  <div class="text-xs text-gray-500 mt-1">
+    <% if exceeded %>
+      <span class="text-red-600">Rate limit exceeded!</span> 
+      <% if seconds_until_expiry && seconds_until_expiry > 0 %>
+        Limit resets in <%= seconds_until_expiry %> seconds.
+      <% else %>
+        Try again now.
+      <% end %>
+    <% else %>
+      <% if seconds_until_expiry && seconds_until_expiry > 0 %>
+        <span>Rate limit status:</span> <%= remaining %> requests remaining. Resets in <%= seconds_until_expiry %> seconds.
+      <% else %>
+        <span>Rate limit status:</span> <%= remaining %> requests remaining.
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Dynamic Visual Diagram -->
+  <div class="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+    <h5 class="text-xs font-medium mb-2">Current sliding window visualization</h5>
+    
+    <svg width="100%" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" class="overflow-visible">
+      <!-- Timeline -->
+      <line x1="40" y1="80" x2="360" y2="80" stroke="#94a3b8" stroke-width="2"/>
+      
+      <!-- Time markers -->
+      <line x1="40" y1="80" x2="40" y2="85" stroke="#64748b" stroke-width="1.5"/>
+      <line x1="160" y1="80" x2="160" y2="85" stroke="#64748b" stroke-width="1.5"/>
+      <line x1="280" y1="80" x2="280" y2="85" stroke="#64748b" stroke-width="1.5"/>
+      <line x1="360" y1="80" x2="360" y2="85" stroke="#64748b" stroke-width="1.5"/>
+      
+      <!-- Time labels -->
+      <text x="40" y="100" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#64748b">t-1</text>
+      <text x="160" y="100" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#64748b">t</text>
+      <text x="280" y="100" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#64748b">t+1</text>
+      
+      <!-- Windows -->
+      <rect x="40" y="40" width="120" height="30" fill="#d1fae5" stroke="#047857" stroke-width="1" rx="2" ry="2"/>
+      <rect x="160" y="40" width="120" height="30" fill="#dbeafe" stroke="#2563eb" stroke-width="1" rx="2" ry="2"/>
+      
+      <!-- Window labels -->
+      <text x="100" y="58" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#047857">
+        Previous (<%= previous_count %>)
+      </text>
+      <text x="220" y="58" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#2563eb">
+        Current (<%= current_count %>)
+      </text>
+      
+      <!-- Current position marker -->
+      <% current_position_x = 160 + (position * 120) %>
+      <line x1="<%= current_position_x %>" y1="30" x2="<%= current_position_x %>" y2="90" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <circle cx="<%= current_position_x %>" cy="90" r="3" fill="#dc2626"/>
+      <text x="<%= current_position_x %>" y="110" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dc2626">Now</text>
+      
+      <!-- Sliding window visualization -->
+      <linearGradient id="slidingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#d1fae5;stop-opacity:0.8"/>
+        <stop offset="<%= (1-position)*100 %>%" style="stop-color:#d1fae5;stop-opacity:0.8"/>
+        <stop offset="<%= (1-position)*100 %>%" style="stop-color:#dbeafe;stop-opacity:0.8"/>
+        <stop offset="100%" style="stop-color:#dbeafe;stop-opacity:0.8"/>
+      </linearGradient>
+      
+      <!-- Start of sliding window marker -->
+      <% sliding_window_start_x = current_position_x - 120 %>
+      <line x1="<%= sliding_window_start_x %>" y1="30" x2="<%= sliding_window_start_x %>" y2="90" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="3,2"/>
+      
+      <rect x="<%= sliding_window_start_x %>" y="15" width="120" height="15" fill="url(#slidingGradient)" stroke="#475569" stroke-width="1" rx="3" ry="3"/>
+      <text x="<%= current_position_x - 60 %>" y="26" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e293b">Sliding Window</text>
+      
+      <!-- Window percentage labels -->
+      <text x="<%= 160 - ((1-position) * 120 / 2) %>" y="20" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#64748b">
+        <%= ((1-position) * 100).round %>%
+      </text>
+      <text x="<%= 160 + (position * 120 / 2) %>" y="20" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#64748b">
+        <%= (position * 100).round %>%
+      </text>
+      
+      <!-- Formula Result -->
+      <rect x="290" y="25" width="70" height="40" rx="4" ry="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+      <text x="325" y="40" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#64748b">Weighted Count</text>
+      <text x="325" y="55" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="<%= exceeded ? '#dc2626' : '#2563eb' %>">
+        <%= count %>/<%= limit %>
+      </text>
+    </svg>
+  </div>
+
+  <div class="text-xs text-gray-500 mt-3">
+    <div class="text-xs mt-2">
+      <strong>Formula:</strong> current_count + previous_count × (1 - position) = <%= current_count %> + <%= previous_count %> × <%= (1 - position).round(2) %> = <%= count %>
+    </div>
+  </div>
+
+  <div class="text-xs text-gray-400 mt-3">
+    <strong>Cache key:</strong> <%= current_key %>
+    <% if current_window_expires_at %>
+      <div>
+        <strong>Expires at:</strong> <%= current_window_expires_at.strftime("%H:%M:%S") %> 
+        (<%= seconds_until_expiry %> seconds from now)
+      </div>
+    <% end %>
+    
+    <div class="flex justify-end mt-3">
+      <button onclick="window.location.reload()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs py-1 px-2 rounded flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Refresh
+      </button>
+    </div> 
+  </div>
+<% end %>
