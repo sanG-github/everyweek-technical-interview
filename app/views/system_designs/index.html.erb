@@ -9,25 +9,9 @@
     <div class="mx-auto mt-16 max-w-2xl lg:mt-24 lg:max-w-5xl">
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <% @system_designs.each do |design| %>
-          <div class="relative overflow-hidden rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300">
+          <div class="relative overflow-hidden rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 flex flex-col min-h-[260px]">
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-black">
-              <% if design[:name] == "Rate Limiting" %>
-                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              <% elsif design[:name] == "Partitioning" %>
-                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="2" />
-                  <line x1="12" y1="2" x2="12" y2="22" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                </svg>
-              <% elsif design[:name] == "Sharding" %>
-                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-                  <line x1="12" y1="2" x2="12" y2="22" />
-                </svg>
-              <% end %>
+              <%= image_tag "#{design[:name].downcase.gsub(' ', '_')}_icon.svg", class: "h-6 w-6" %>
             </div>
             
             <h3 class="mt-4 text-xl font-semibold tracking-tight text-black"><%= design[:name] %></h3>
@@ -36,12 +20,10 @@
               <%= design[:description] %>
             </p>
             
-            <div class="mt-6">
+            <div class="mt-auto pt-6">
               <%= link_to design[:path], class: "inline-flex items-center text-sm font-semibold leading-6 text-black transition-colors hover:text-gray-700" do %>
                 Explore <%= design[:name] %>
-                <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                </svg>
+                <%= image_tag "arrow_right_icon.svg", class: "ml-1 h-4 w-4" %>
               <% end %>
             </div>
           </div>
