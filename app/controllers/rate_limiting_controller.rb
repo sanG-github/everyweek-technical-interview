@@ -1,65 +1,33 @@
 class RateLimitingController < ApplicationController
-  # Use Rails 8's native rate limiting for API endpoints
-  # Following the specified configuration with custom response handler
-  rate_limit to: 4,
-             within: 1.minute,
+  include RateLimitCacheManager
+
+  RATE_LIMIT = 4
+  RATE_LIMIT_DURATION = 30.seconds
+
+  before_action :set_rate_limit_status, only: [ :index ]
+
+  rate_limit to: RATE_LIMIT,
+             within: RATE_LIMIT_DURATION,
              by: -> { request.domain },
-             with: -> {
-               # Store last request time in cache to calculate accurate reset time
-               Rails.cache.write("rate-limit-reset:rate_limiting:create:#{request.domain}", Time.now + 1.minute, expires_in: 1.minute)
-
-               # Cache the current count explicitly for display
-               count = Rails.cache.read("rate-limit:rate_limiting:create:#{request.domain}") || 0
-
-               # Custom response handler for rate limiting
-               respond_to do |format|
-                 format.turbo_stream do
-                   reset_time = (Rails.cache.read("rate-limit-reset:rate_limiting:create:#{request.domain}") - Time.now).round
-                   flash.now[:api_message] = "Rate limited! Try again in #{reset_time} seconds."
-                   flash.now[:api_error] = true
-                   render "rate_limited"
-                 end
-                 format.json {
-                   reset_time = (Rails.cache.read("rate-limit-reset:rate_limiting:create:#{request.domain}") - Time.now).round
-                   render json: { error: "Rate limited", reset_in: reset_time }, status: :too_many_requests
-                 }
-                 format.html {
-                   reset_time = (Rails.cache.read("rate-limit-reset:rate_limiting:create:#{request.domain}") - Time.now).round
-                   flash[:api_message] = "Rate limited! Try again in #{reset_time} seconds."
-                   flash[:api_error] = true
-                   redirect_to rate_limiting_path and return
-                 }
-               end
-             },
+             with: -> { handle_rate_limit_exceeded },
              only: :create
 
   def index
-    # Reset flash messages on page load
     flash.now[:api_message] = nil
     flash.now[:api_error] = nil
   end
 
   def create
-    # Simulate API behavior
     response_time = rand(50..200)
-    sleep(0.1) # Simulate network latency
-
-    # Explicitly access the rate limit cache key to ensure we see the incremented value
-    # that the rate_limit DSL will use internally
-    cache_key = [ "rate-limit", controller_path, nil, request.domain ].compact.join(":")
-
-    # We don't need to increment here since the rate_limit method will do it
-    # But we need to read the updated value for display
-    current_count = Rails.cache.read(cache_key)
-
-    # Store last request time in cache
-    Rails.cache.write("rate-limit-reset:rate_limiting:create:#{request.domain}", Time.now + 1.minute, expires_in: 1.minute)
+    sleep(0.1)
+    update_reset_time(RATE_LIMIT_DURATION)
 
     respond_to do |format|
       format.turbo_stream do
         flash.now[:api_message] = "API request successful (#{response_time}ms)"
         flash.now[:api_error] = false
-        render "create" # Explicitly render the create template
+        @status = rate_limit_status(RATE_LIMIT)
+        render "create"
       end
       format.json { render json: { success: true, response_time: response_time } }
       format.html {
@@ -70,19 +38,14 @@ class RateLimitingController < ApplicationController
   end
 
   def reset
-    # Reset the rate limiting counter for demo purposes
-    # Build the cache key the same way Rails does internally
-    cache_key = [ "rate-limit", controller_path, nil, request.domain ].compact.join(":")
-    Rails.cache.delete(cache_key)
-
-    # Also delete the reset time
-    Rails.cache.delete("rate-limit-reset:rate_limiting:create:#{request.domain}")
+    reset_rate_limit_counter
 
     respond_to do |format|
       format.turbo_stream do
         flash.now[:api_message] = "Counter reset successfully"
         flash.now[:api_error] = false
-        render "reset" # Explicitly render the reset template
+        @status = reset_data
+        render "reset"
       end
       format.json { render json: { success: true, message: "Counter reset successfully" } }
       format.html {
@@ -90,5 +53,45 @@ class RateLimitingController < ApplicationController
         redirect_to rate_limiting_path and return
       }
     end
+  end
+
+  private
+
+  def handle_rate_limit_exceeded
+    update_reset_time(RATE_LIMIT_DURATION)
+
+    respond_to do |format|
+      format.turbo_stream do
+        flash.now[:api_message] = "Rate limited! Try again in #{seconds_until_reset} seconds."
+        flash.now[:api_error] = true
+        @status = rate_limit_status(RATE_LIMIT)
+        render "rate_limited"
+      end
+      format.json {
+        render json: {
+          error: "Rate limited",
+          reset_in: seconds_until_reset
+        }, status: :too_many_requests
+      }
+      format.html {
+        flash[:api_message] = "Rate limited! Try again in #{seconds_until_reset} seconds."
+        flash[:api_error] = true
+        redirect_to rate_limiting_path and return
+      }
+    end
+  end
+
+  def reset_data
+    {
+      count: 0,
+      limit: RATE_LIMIT,
+      reset_time: 0,
+      cache_key: rate_limit_cache_key,
+      expires_at: nil
+    }
+  end
+
+  def set_rate_limit_status
+    @rate_limit_status = rate_limit_status(RATE_LIMIT)
   end
 end
