@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  get "system_designs/index"
+  get "system_designs/rate_limiting"
+  get "system_designs/partitioning"
+  get "system_designs/sharding"
+
+  # API Demo endpoints
+  post "system_designs/api_demo"
+  post "system_designs/reset_rate_limit"
+
   resources :posts
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -11,5 +20,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "system_designs#index"
 end
