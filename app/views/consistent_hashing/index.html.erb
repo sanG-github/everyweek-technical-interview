@@ -100,7 +100,7 @@
         This ensures a more even distribution of keys among servers.
       </p>
       
-      <div class="mt-10 bg-white p-6 rounded-lg shadow-sm" data-controller="consistent-hashing" data-consistent-hashing-demo-type-value="consistent">
+      <div class="mt-10 bg-white p-6 rounded-lg shadow-sm" data-controller="consistent-hashing-ring">
         <h3 class="text-lg font-bold tracking-tight text-black">Consistent Hashing Demo</h3>
         <p class="mt-2 text-sm text-gray-500">
           Explore how consistent hashing works by adding/removing servers and keys. Toggle virtual nodes to see their effect on distribution.
@@ -108,77 +108,80 @@
         
         <div class="mt-6" id="consistent_hashing_demo">
           <!-- Consistent hashing visualization will be inserted here by JavaScript -->
-          <div class="h-72 bg-gray-50 rounded-md flex items-center justify-center" data-consistent-hashing-target="vizContainer">
+          <div class="h-80 bg-gray-50 rounded-md flex flex-col items-center justify-center" data-consistent-hashing-ring-target="vizContainer">
             <p class="text-gray-500">Consistent hashing visualization loading...</p>
           </div>
           
-          <div class="mt-6 flex flex-wrap justify-center gap-3">
-            <button type="button"
-                class="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-                data-action="consistent-hashing#addConsistentServer"
-                data-consistent-hashing-target="addServerBtn">
-              Add Server
-            </button>
-            
-            <button type="button"
-                class="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                data-action="consistent-hashing#removeConsistentServer"
-                data-consistent-hashing-target="removeServerBtn">
-              Remove Server
-            </button>
-            
-            <div class="flex items-center gap-2">
-              <input type="text" 
-                    class="block w-36 rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6" 
-                    placeholder="Key name" 
-                    data-consistent-hashing-target="consistentKeyInput">
+          <p class="text-xs text-gray-500 text-center my-4 italic">
+            <span class="inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+              Drag keys to rearrange the visualization</span>
+          </p>
+
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap justify-center gap-2">
+            <!-- Server Controls -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <button type="button"
+                  class="rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-gray-800 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#addConsistentServer"
+                  data-consistent-hashing-ring-target="addServerBtn">
+                Add Server
+              </button>
               
               <button type="button"
-                  class="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-                  data-action="consistent-hashing#addKeyConsistent"
-                  data-consistent-hashing-target="addKeyBtn">
-                Add
+                  class="rounded-md bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#removeConsistentServer"
+                  data-consistent-hashing-ring-target="removeServerBtn">
+                Remove Server
               </button>
             </div>
             
-            <button type="button"
-                class="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                data-action="consistent-hashing#removeConsistentKey"
-                data-consistent-hashing-target="removeKeyBtn">
-              Remove Key
-            </button>
+            <!-- Key Controls -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-2 sm:mt-0">
+              <input type="text" 
+                    class="rounded-md border-0 py-1.5 px-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black w-32 sm:w-36" 
+                    placeholder="Hash (0-999)" 
+                    data-consistent-hashing-ring-target="consistentKeyInput">
+              
+              <button type="button"
+                  class="rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-gray-800 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#addKeyConsistent"
+                  data-consistent-hashing-ring-target="addKeyBtn">
+                Add Key
+              </button>
+              
+              <button type="button"
+                  class="rounded-md bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#removeConsistentKey"
+                  data-consistent-hashing-ring-target="removeKeyBtn">
+                Remove Key
+              </button>
+            </div>
             
-            <button type="button"
-                class="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-                data-action="consistent-hashing#toggleVirtualNodes"
-                data-consistent-hashing-target="toggleVirtualNodesBtn">
-              Toggle Virtual Nodes
-            </button>
-            
-            <button type="button"
-                class="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-                data-action="consistent-hashing#resetConsistent"
-                data-consistent-hashing-target="resetBtn">
-              Reset
-            </button>
-          </div>
-          
-          <!-- Hash Calculation Explanation -->
-          <div data-consistent-hashing-target="hashExplanation" class="mt-6">
-            <!-- Hash explanation will be inserted here by JavaScript -->
-          </div>
-          
-          <div class="mt-6 p-4 bg-gray-50 rounded-md">
-            <div id="consistent_hashing_stats" class="text-sm grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <p>Servers: <span class="font-medium" data-consistent-hashing-target="serverCount">3</span></p>
-              <p>Keys: <span class="font-medium" data-consistent-hashing-target="keyCount">10</span></p>
-              <p>Virtual nodes: <span class="font-medium" data-consistent-hashing-target="virtualNodeCount">3</span></p>
-              <p>Keys relocated: <span class="font-medium" data-consistent-hashing-target="keysRelocated">0</span></p>
+            <!-- Additional Controls -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-2 md:mt-0">
+              <button type="button"
+                  class="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#toggleVirtualNodes"
+                  data-consistent-hashing-ring-target="toggleVirtualNodesBtn">
+                Toggle Virtual Nodes
+              </button>
+              
+              <button type="button"
+                  class="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 sm:px-4 sm:py-2 sm:text-sm"
+                  data-action="consistent-hashing-ring#resetConsistent"
+                  data-consistent-hashing-ring-target="resetBtn">
+                Reset
+              </button>
             </div>
           </div>
           
+          <!-- Hash Calculation Explanation -->
+          <div data-consistent-hashing-ring-target="hashExplanation" class="mt-6">
+            <!-- Hash explanation will be inserted here by JavaScript -->
+          </div>
+          
           <!-- Hash Table Display -->
-          <div class="mt-6 overflow-x-auto" data-consistent-hashing-target="hashTable">
+          <div class="mt-6 overflow-x-auto" data-consistent-hashing-ring-target="hashTable">
             <!-- Hash assignment table will be inserted here by JavaScript -->
           </div>
         </div>

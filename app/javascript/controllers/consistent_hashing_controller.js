@@ -523,7 +523,7 @@ export default class extends Controller {
     
     const headerRow = document.createElement("tr")
     
-    const headers = ["Key", "Hash Value", "Calculation", "Server Assignment", "Relocated?"]
+    const headers = ["Key", "Calculation", "Server Assignment", "Relocated?"]
     headers.forEach(text => {
       const th = document.createElement("th")
       th.scope = "col"
@@ -556,12 +556,6 @@ export default class extends Controller {
       keyCell.textContent = key
       row.appendChild(keyCell)
       
-      // Hash value cell
-      const hashCell = document.createElement("td")
-      hashCell.className = "px-3 py-2 whitespace-nowrap font-mono text-xs"
-      hashCell.textContent = hash
-      row.appendChild(hashCell)
-      
       // Calculation cell
       const calcCell = document.createElement("td")
       calcCell.className = "px-3 py-2 whitespace-nowrap font-mono text-xs"
@@ -586,7 +580,7 @@ export default class extends Controller {
       
       if (wasRelocated) {
         const badge = document.createElement("span")
-        badge.className = "px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"
+        badge.className = "px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
         badge.textContent = "Yes"
         relocatedCell.appendChild(badge)
       } else {
