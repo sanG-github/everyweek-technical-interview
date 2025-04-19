@@ -16,12 +16,6 @@ Rails.application.routes.draw do
 
   # Consistent Hashing routes
   get "consistent_hashing", to: "consistent_hashing#index", as: :consistent_hashing
-  post "consistent_hashing/add_server", to: "consistent_hashing#add_server", as: :add_server_consistent_hashing
-  post "consistent_hashing/remove_server", to: "consistent_hashing#remove_server", as: :remove_server_consistent_hashing
-  post "consistent_hashing/add_key", to: "consistent_hashing#add_key", as: :add_key_consistent_hashing
-  post "consistent_hashing/remove_key", to: "consistent_hashing#remove_key", as: :remove_key_consistent_hashing
-  post "consistent_hashing/toggle_virtual_nodes", to: "consistent_hashing#toggle_virtual_nodes", as: :toggle_virtual_nodes_consistent_hashing
-  post "consistent_hashing/reset", to: "consistent_hashing#reset", as: :reset_consistent_hashing
 
   resources :posts
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -35,5 +29,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "system_designs#index"
+  root "home#index"
 end
